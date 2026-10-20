@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Секретный Квест</title>
+    
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #240c0c 0%, #0a0303 60%, #000000 100%);
+            color: #ffffff;
+            font-family: 'JetBrains Mono', -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            padding: 25px;
+            max-width: 450px;
+            width: 90%;
+            z-index: 2;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 35px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            line-height: 1.5;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 16px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover, button:active {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+            transform: scale(1.02);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .final-text {
+            font-size: 34px;
+            font-weight: 800;
+            color: #ff4757;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.8), 0 0 40px rgba(255, 71, 87, 0.4);
+            animation: pulse 1.5s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.6;
+        }
+
+        .hint {
+            font-size: 15px;
+            color: #aaa;
+            margin-top: 25px;
+            display: block;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Анимация падающих эмодзи на фоне */
+        .particle {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            animation: fall 3s linear forwards;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.98); filter: drop-shadow(0 0 5px #ff4757); }
+            100% { transform: scale(1.04); filter: drop-shadow(0 0 15px #ff4757); }
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Шаг 1 -->
+        <div id="step1">
+            <h2>Вопрос 1:<br>Ты ничего не забыла сегодня сделать? 🤔</h2>
+            <div class="options">
+                <button onclick="nextStep(1, 2)">Конечно нет, всё под контролем</button>
+                <button onclick="alert('А надо бы вспомнить! Подумай еще раз.')">Кажется, забыла...</button>
+            </div>
+        </div>
+
+        <!-- Шаг 2 -->
+        <div id="step2" class="hidden">
+            <h2>Вопрос 2:<br>Какое приложение прямо сейчас ждет твоего визита? 📱</h2>
+            <div class="options">
+                <button onclick="alert('Мимо! Ищи там, где вертикальные видео.')">Телеграм</button>
+                <button onclick="nextStep(2, 3)">ТикТок</button>
+                <button onclick="alert('Нет, там огоньки не тухнут!')">Ютуб</button>
+            </div>
+        </div>
+
+        <!-- Шаг 3 -->
+        <div id="step3" class="hidden">
+            <h2>Вопрос 3:<br>Что произойдет, если туда не зайти прямо сейчас? 🔥</h2>
+            <div class="options">
+                <button onclick="startFinal()">буся умрет</button>
+                <button onclick="alert('Как это ничего страшного?! Буся в опасности!')">ничего страшного</button>
+            </div>
+        </div>
+
+        <!-- Финал -->
+        <div id="final" class="hidden">
+            <div class="final-text">бабушка Маша, капибара</div>
+            <span class="hint">Бегом в ТТ продлевать пламя! 🔥</span>
+        </div>
+    </div>
+
+    <script>
+        function nextStep(current, next) {
+            document.getElementById('step' + current).classList.add('hidden');
+            document.getElementById('step' + next).classList.remove('hidden');
+        }
+
+        function startFinal() {
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('final').classList.remove('hidden');
+            // Запуск эффекта летящих смайликов 🥰
+            setInterval(createParticle, 300);
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.innerText = '🥰';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            particle.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 4000);
+        }
+    </script>
+
+</body>
+</html>
